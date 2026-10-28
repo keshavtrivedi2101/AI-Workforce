@@ -18,3 +18,5 @@ Key Features:
 Our Vision: To empower every small business with an intelligent digital workforce that saves time, simplifies operations, and supports sustainable growth.
 
 AI Workforce — Work Smarter. Automate Better. Grow Faster.
+
+open for demo :- https://aistudio.google.com/u/1/apps/e31ce7ab-f48a-4af1-a184-80ede34e0761?showPreview=true&showAssistant=true
