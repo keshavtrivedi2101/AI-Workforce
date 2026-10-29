@@ -1,0 +1,249 @@
+###############################################################################
+# AI Workforce — Full-Stack HTTPS REST Client Collection (api.http)
+# Compatible with VS Code REST Client & JetBrains HTTP Client
+###############################################################################
+
+@baseUrl = https://ais-pre-botgw4iqxna2lg7uvxkreg-442298881070.asia-east1.run.app
+# Uncomment below when running locally via `npm run dev`:
+# @baseUrl = http://localhost:3000
+
+@authProvider = local
+@email = operator@apexops.io
+@password = WorkforcePass123!
+
+# =============================================================================
+# 1. AUTHENTICATION (First-Party PostgreSQL Auth)
+# =============================================================================
+
+### 1.1 Register New Isolated Business Workspace
+# @name registerAccount
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Jordan Mercer",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 1.2 Sign In & Capture Bearer Token
+# @name loginAccount
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Active Session Token (auto-extracted from loginAccount response)
+@token = {{loginAccount.response.body.token}}
+
+# =============================================================================
+# 2. WORKSPACE SESSION & EXECUTIVE DASHBOARD
+# =============================================================================
+
+### 2.1 Fetch Authenticated Tenant Workspace & Role
+GET {{baseUrl}}/api/workspace
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 2.2 Fetch Real-Time SQL Dashboard KPIs & Funnel Charts
+GET {{baseUrl}}/api/dashboard
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+# =============================================================================
+# 3. ORCHESTRATOR · MULTI-AGENT DAG PLANNER
+# =============================================================================
+
+### 3.1 Execute Natural-Language Business Directive (DAG Plan + Tool Calls + Checkpoint)
+# @name executeDirective
+POST {{baseUrl}}/api/directives/execute
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "directive": "Onboard inbound inquiry from Apex Logistics (Maya Lin, maya@apexlogistics.io, VP Operations, Logistics & Supply Chain, 85 employees, $28,000 budget, struggling with manual warehouse dispatch spreadsheets): create the CRM record, evaluate fit score, sync to Google Sheets, and draft a personalized follow-up held for my sign-off.",
+  "faultInjectionMode": "none",
+  "idempotencyKey": "directive-apex-logistics-001"
+}
+
+# =============================================================================
+# 4. LEADS CRM (CRUD & DEMO PIPELINE IMPORT)
+# =============================================================================
+
+### 4.1 List All Tenant CRM Leads
+# @name listLeads
+GET {{baseUrl}}/api/leads
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+@leadId = {{listLeads.response.body.leads[0].id}}
+
+### 4.2 Import Starter Demo Leads (Idempotent)
+POST {{baseUrl}}/api/leads/import-demo
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 4.3 Create a New B2B Prospect Record
+# @name createLead
+POST {{baseUrl}}/api/leads
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "firstName": "Elena",
+  "lastName": "Rostova",
+  "email": "elena@vanguardcloud.io",
+  "phone": "+1-415-555-0194",
+  "jobTitle": "Head of Revenue Operations",
+  "companyName": "Vanguard Cloud Systems",
+  "companyWebsite": "https://vanguardcloud.io",
+  "industry": "SaaS",
+  "companySize": 140,
+  "estimatedBudgetUsd": 36000,
+  "source": "HTTPS API Intake",
+  "painPoints": "Disconnected inbound qualification between web forms, spreadsheets, and sales reps.",
+  "notes": "Requested architectural walkthrough this week."
+}
+
+### 4.4 Get Full Lead Profile, Qualification Breakdown, Drafts & Audit Trail
+GET {{baseUrl}}/api/leads/{{leadId}}
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 4.5 Update Lead Status or Firmographics
+PATCH {{baseUrl}}/api/leads/{{leadId}}
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "estimatedBudgetUsd": 42000,
+  "notes": "Updated annual automation budget confirmed during discovery call."
+}
+
+### 4.6 Delete a Lead Record
+DELETE {{baseUrl}}/api/leads/{{createLead.response.body.lead.id}}
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+# =============================================================================
+# 5. SPECIALIZED AI AGENTS (Direct Invocation)
+# =============================================================================
+
+### 5.1 List AI Agent Execution Telemetry
+GET {{baseUrl}}/api/agents/runs
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 5.2 Run Agent A · Lead Research & Qualification (0–100 Transparent Fit Score)
+POST {{baseUrl}}/api/agents/qualify/{{leadId}}
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 5.3 Run Agent B · Sales Outreach Draft Generator (Staged at Approval Gate)
+POST {{baseUrl}}/api/agents/outreach/{{leadId}}
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 5.4 Run Agent D · Business Insights Executive Briefing
+POST {{baseUrl}}/api/agents/insights
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+# =============================================================================
+# 6. COORDINATED WORKFLOWS & SELF-HEALING ORCHESTRATION
+# =============================================================================
+
+### 6.1 List Workflow Runs & Step-by-Step Traces
+GET {{baseUrl}}/api/workflows
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 6.2 Execute Agent C · Coordinated Lead-to-Outreach Workflow (With Transient Fault Healing)
+POST {{baseUrl}}/api/workflows/execute
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "leadId": "{{leadId}}",
+  "faultInjectionMode": "transient_network",
+  "idempotencyKey": "wf-self-healing-demo-001"
+}
+
+# =============================================================================
+# 7. SUPERVISOR HUMAN-IN-THE-LOOP APPROVAL CHECKPOINT
+# =============================================================================
+
+### 7.1 List Pending & Historical Approval Checkpoints
+# @name listApprovals
+GET {{baseUrl}}/api/approvals
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+@approvalId = {{listApprovals.response.body.approvals[0].id}}
+
+### 7.2 One-Click Supervisor Sign-Off (Releases Safe Simulated Outreach & Webhook)
+POST {{baseUrl}}/api/approvals/{{approvalId}}/decide
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "decision": "approved",
+  "decisionNotes": "Verified personalization facts and approved via HTTPS API."
+}
+
+# =============================================================================
+# 8. CONNECTED BUSINESS TOOLS, AUDIT LOGS & WORKSPACE SETTINGS
+# =============================================================================
+
+### 8.1 Inspect Connected Tool Invocations & Webhook Outbox Ledger
+GET {{baseUrl}}/api/tools/invocations
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 8.2 Trigger Live Connector Relay Test (postgres_crm | google_sheets_sync | airtable_pipeline | webhook_outbox)
+POST {{baseUrl}}/api/tools/test-relay
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "connectorKey": "google_sheets_sync"
+}
+
+### 8.3 Fetch Tenant Activity & Self-Healing Error Audit Logs
+GET {{baseUrl}}/api/logs
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+
+### 8.4 Update Business Qualification Criteria & Preferences (Admin Only)
+PUT {{baseUrl}}/api/settings
+Authorization: Bearer {{token}}
+X-Auth-Provider: {{authProvider}}
+Content-Type: application/json
+
+{
+  "name": "Apex Revenue Operations",
+  "industry": "B2B Operations & Automation",
+  "website": "https://apexops.io",
+  "valueProposition": "We automate inbound lead qualification, CRM enrichment, and human-verified sales outreach for high-growth B2B teams.",
+  "senderName": "Jordan Mercer",
+  "senderRole": "Managing Director",
+  "qualificationCriteria": {
+    "targetIndustries": ["SaaS", "FinTech", "Logistics", "Healthcare", "Manufacturing"],
+    "minBudgetUsd": 15000,
+    "minCompanySize": 20,
+    "fitThresholdScore": 70,
+    "autoDraftMinScore": 55,
+    "maxWorkflowRetries": 2,
+    "idealCustomerNotes": "Mid-market B2B teams replacing manual spreadsheet handoffs with auditable AI workflows.",
+    "toneOfVoice": "Consultative, concise, factual, and executive-ready"
+  }
+}
